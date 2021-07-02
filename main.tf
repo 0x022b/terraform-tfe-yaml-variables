@@ -26,7 +26,7 @@ variable "workspace" {
 }
 
 locals {
-  variables = yamldecode(data.local_file.yaml.content)
+  variables = try(yamldecode(trimprefix(data.local_file.yaml.content, "---")), [])
 }
 
 data "local_file" "yaml" {
