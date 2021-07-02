@@ -1,5 +1,8 @@
 terraform {
   required_providers {
+    local = {
+      source = "hashicorp/local"
+    }
     tfe = {
       source = "hashicorp/tfe"
     }
@@ -23,8 +26,11 @@ variable "workspace" {
 }
 
 locals {
-  variables = yamldecode(file(local.yamlfile))
-  yamlfile  = "${var.dirname}/${data.tfe_workspace.this.name}.yaml"
+  variables = yamldecode(data.local_file.yaml.content)
+}
+
+data "local_file" "yaml" {
+  filename = "${var.dirname}/${data.tfe_workspace.this.name}.yaml"
 }
 
 data "tfe_workspace" "this" {
