@@ -47,6 +47,6 @@ resource "tfe_variable" "map" {
 }
 
 output "variables" {
-  description = "YAML file variables as a map."
+  description = "YAML file variables as a key-value map."
   value       = { for v in module.yaml.variables : v.key => v.value }
 }
