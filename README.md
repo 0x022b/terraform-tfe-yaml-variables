@@ -15,7 +15,7 @@ There are several ways to provide the required token for the provider:
 
 When configuring the input variable for either of these options, mark them as sensitive.
 
-## Example Usage
+## Usage example
 
 This module reads all arguments that `tfe_variable` supports from the YAML file. See the documentation for more information about [`tfe_variable`][tfe_variable] resource arguments. Only expection to `tfe_variable` resource arguments is that `category` is by default set to `terraform`.
 
@@ -24,36 +24,42 @@ This module reads all arguments that `tfe_variable` supports from the YAML file.
 ```yaml
 - key: count
   value: 3
+- key: instance_type
+  value: t2.micro
 ```
 
 ### `main.tf`
 
 ```hcl
-module "yamlvars" {
+module "yaml" {
   source  = "0x022b/yaml-variables/tfe"
+  version = "~> 1.0"
 
   organization = "my-organization-name"
   workspace    = "my-workspace-name"
 }
 
-locals {
-  var = module.yamlvars.variables
-}
-
 resource "aws_instance" "cluster" {
-  count = local.var.count
+  count = module.yaml.variables.count
 
+  instance_type = module.yaml.variables.instance_type
   # ...
 }
 ```
 
-## Argument Reference
+## Inputs
 
-The following arguments are supported:
+Name         | Description
+-------------|-------------
+organization | Name of the organization.
+workspace    | Name of the workspace.
+dirname      | Filesystem path to a directory containing variable files.
 
-* `organization` - (Required) Name of the organization.
-* `workspace` - (Required) Name of the workspace.
-* `dirname` - (Optional) Filesystem path to a directory containing variable files.
+## Outputs
+
+Name      | Description
+----------|-------------
+variables | YAML file variables as a key-value map.
 
 ## License
 
