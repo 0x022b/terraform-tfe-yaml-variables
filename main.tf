@@ -1,8 +1,7 @@
 terraform {
+  required_version = ">= 0.12"
+
   required_providers {
-    local = {
-      source = "hashicorp/local"
-    }
     tfe = {
       source = "hashicorp/tfe"
     }
@@ -25,12 +24,11 @@ variable "workspace" {
   type        = string
 }
 
-locals {
-  variables = try(yamldecode(trimprefix(data.local_file.yaml.content, "---")), [])
-}
+module "yaml" {
+  source  = "0x022b/yaml-variables/local"
+  version = "~> 1.0"
 
-data "local_file" "yaml" {
-  filename = "${var.dirname}/${data.tfe_workspace.this.name}.yaml"
+  filename = "${var.dirname}/${var.workspace}.yaml"
 }
 
 data "tfe_workspace" "this" {
@@ -39,7 +37,7 @@ data "tfe_workspace" "this" {
 }
 
 resource "tfe_variable" "map" {
-  for_each = { for v in local.variables : v.key => v }
+  for_each = { for v in module.yaml.variables : v.key => v }
 
   category     = lookup(each.value, "category", "terraform")
   description  = lookup(each.value, "description", null)
@@ -51,6 +49,6 @@ resource "tfe_variable" "map" {
 }
 
 output "variables" {
-  description = "YAML file variables as a map."
-  value       = { for v in local.variables : v.key => v.value }
+  description = "YAML file variables as a key-value map."
+  value       = { for v in module.yaml.variables : v.key => v.value }
 }
